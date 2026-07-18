@@ -18,6 +18,7 @@
   async function initialize() {
     collectElements();
     bindEvents();
+    freezeCompletedHintCounts();
     setBusy(true, "Datenbank wird geladen …");
     try {
       await db.initialize();
@@ -41,7 +42,11 @@
       "schema-fields", "sql-editor", "line-numbers", "run-query", "check-solution", "db-status", "feedback",
       "result-meta", "result-container", "intro-dialog", "start-game", "success-dialog", "success-title", "success-text",
       "code-fragment", "next-mission", "open-info", "close-info", "info-dialog", "export-progress",
-      "import-progress", "import-file", "final-dialog", "final-code", "export-final-progress", "close-final", "toast"
+      "import-progress", "import-file", "open-final", "final-dialog", "final-code", "final-hints-total", "final-no-hint-count",
+      "certificate-name", "certificate-error", "open-certificate", "export-final-progress", "close-final",
+      "certificate-dialog", "close-certificate", "certificate-player", "certificate-hints-total",
+      "certificate-without-hints", "certificate-chapters", "certificate-date", "certificate-code",
+      "print-certificate", "back-to-final", "toast"
     ].forEach(id => { els[id] = document.getElementById(id); });
   }
 
@@ -63,6 +68,7 @@
     els["export-final-progress"].addEventListener("click", exportProgress);
     els["import-progress"].addEventListener("click", () => els["import-file"].click());
     els["import-file"].addEventListener("change", importProgress);
+    els["open-final"].addEventListener("click", showFinalDialog);
     els["sql-editor"].addEventListener("input", updateEditor);
     els["sql-editor"].addEventListener("keydown", event => {
       if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
@@ -93,6 +99,23 @@
     els["success-dialog"].addEventListener("click", closeOnBackdrop);
     els["final-dialog"].addEventListener("click", closeOnBackdrop);
     els["close-final"].addEventListener("click", () => els["final-dialog"].close());
+    els["open-certificate"].addEventListener("click", openCertificate);
+    els["certificate-name"].addEventListener("input", () => {
+      els["certificate-error"].hidden = true;
+    });
+    els["certificate-name"].addEventListener("keydown", event => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        openCertificate();
+      }
+    });
+    els["close-certificate"].addEventListener("click", closeCertificate);
+    els["back-to-final"].addEventListener("click", closeCertificate);
+    els["print-certificate"].addEventListener("click", () => window.print());
+    els["certificate-dialog"].addEventListener("cancel", event => {
+      event.preventDefault();
+      closeCertificate();
+    });
   }
 
   function closeOnBackdrop(event) {
@@ -153,6 +176,7 @@
     els["progress-bar"].style.width = `${solved / challenges.length * 100}%`;
     const progress = els["progress-bar"].parentElement;
     progress.setAttribute("aria-valuenow", String(solved));
+    els["open-final"].hidden = solved !== challenges.length;
     progress.setAttribute("aria-valuemax", String(challenges.length));
   }
 
@@ -348,6 +372,7 @@
     const alreadyDone = state.solvedChallenges.includes(activeChallenge.id);
     if (!alreadyDone) {
       state.solvedChallenges.push(activeChallenge.id);
+      state.hintsAtCompletion[activeChallenge.id] = getHintCount(activeChallenge.id);
       state.codeFragments.push(activeChallenge.fragment);
       storage.save(state);
     }
@@ -379,10 +404,93 @@
     els["success-dialog"].close();
     const index = challenges.indexOf(activeChallenge);
     if (index < challenges.length - 1) selectChallenge(challenges[index + 1].id);
-    else {
-      els["final-code"].textContent = state.codeFragments.join("");
-      els["final-dialog"].showModal();
+    else showFinalDialog();
+  }
+
+  function getHintCount(challengeId) {
+    const frozen = state.hintsAtCompletion[challengeId];
+    const current = state.hintsUsed[challengeId];
+    const value = frozen ?? current ?? 0;
+    return Math.max(0, Math.min(3, Number(value) || 0));
+  }
+
+  function freezeCompletedHintCounts() {
+    let changed = false;
+    state.solvedChallenges.forEach(challengeId => {
+      if (state.hintsAtCompletion[challengeId] === undefined) {
+        state.hintsAtCompletion[challengeId] = getHintCount(challengeId);
+        changed = true;
+      }
+    });
+    if (changed) storage.save(state);
+  }
+
+  function getSupportStats() {
+    const solved = challenges.filter(challenge => state.solvedChallenges.includes(challenge.id));
+    const rows = chapters.map(chapter => {
+      const chapterChallenges = solved.filter(challenge => challenge.chapter === chapter.id);
+      return {
+        chapter,
+        missions: chapterChallenges.length,
+        hints: chapterChallenges.reduce((sum, challenge) => sum + getHintCount(challenge.id), 0)
+      };
+    });
+    const totalHints = rows.reduce((sum, row) => sum + row.hints, 0);
+    const withoutHints = solved.filter(challenge => getHintCount(challenge.id) === 0).length;
+    return { solved: solved.length, totalHints, withoutHints, rows };
+  }
+
+  function showFinalDialog() {
+    const stats = getSupportStats();
+    els["final-code"].textContent = state.codeFragments.join("");
+    els["final-hints-total"].textContent = String(stats.totalHints);
+    els["final-no-hint-count"].textContent = String(stats.withoutHints);
+    els["certificate-name"].value = state.certificateName || "";
+    els["certificate-error"].hidden = true;
+    els["final-dialog"].showModal();
+  }
+
+  function openCertificate() {
+    if (state.solvedChallenges.length !== challenges.length) {
+      els["certificate-error"].textContent = "Das Zertifikat wird nach Abschluss aller Missionen freigeschaltet.";
+      els["certificate-error"].hidden = false;
+      return;
     }
+    const playerName = els["certificate-name"].value.trim().replace(/\s+/g, " ");
+    if (!playerName) {
+      els["certificate-error"].textContent = "Bitte gib den Namen für das Zertifikat ein.";
+      els["certificate-error"].hidden = false;
+      els["certificate-name"].focus();
+      return;
+    }
+    state.certificateName = playerName;
+    storage.save(state);
+    renderCertificate(playerName);
+    els["final-dialog"].close();
+    els["certificate-dialog"].showModal();
+  }
+
+  function renderCertificate(playerName) {
+    const stats = getSupportStats();
+    els["certificate-player"].textContent = playerName;
+    els["certificate-hints-total"].textContent = String(stats.totalHints);
+    els["certificate-without-hints"].textContent = String(stats.withoutHints);
+    els["certificate-code"].textContent = state.codeFragments.join("");
+    els["certificate-date"].textContent = new Intl.DateTimeFormat("de-CH", {
+      day: "2-digit", month: "2-digit", year: "numeric"
+    }).format(new Date());
+    els["certificate-chapters"].innerHTML = stats.rows.map(row => `
+      <tr>
+        <td>Kapitel ${row.chapter.number} · ${escapeHtml(row.chapter.title)}</td>
+        <td>${row.missions}</td>
+        <td>${row.hints}</td>
+      </tr>
+    `).join("");
+  }
+
+  function closeCertificate() {
+    els["certificate-dialog"].close();
+    showFinalDialog();
   }
 
   function resetDatabase() {
@@ -422,6 +530,7 @@
     try {
       const payload = JSON.parse(await file.text());
       state = storage.importState(payload);
+      freezeCompletedHintCounts();
       db.reset();
       const initial = getAvailableChallenge(state.currentChallenge);
       selectChallenge(initial.id);

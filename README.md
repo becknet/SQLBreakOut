@@ -16,6 +16,7 @@ Statische Lern-Web-App für SQL mit einer fortlaufenden Geschichte in der fiktiv
 - Datenbank- und Fortschritts-Reset
 - lokaler Spielstand via `localStorage`
 - Export und Import des Spielstands als JSON-Datei
+- personalisiertes Abschlusszertifikat mit Hinweisstatistik und PDF-Druck
 - isolierte Vorschau für `INSERT`, `UPDATE` und `DELETE`
 - blockierte `UPDATE`- und `DELETE`-Anweisungen ohne `WHERE`
 - responsive, tastaturbedienbare Oberfläche
@@ -44,6 +45,12 @@ Gruppierungen mit `GROUP BY`, Gruppenfilter mit `HAVING` und Kombinationen mit A
 Sichere Datenänderungen mit `INSERT`, `UPDATE`, `DELETE` und präzisen `WHERE`-Filtern. Die Abschlussmission kombiniert Filter, Gruppierung, Aggregation, Sortierung und Begrenzung.
 
 Die Aufgaben werden über das tatsächliche Abfrageergebnis oder den resultierenden Datenzustand geprüft. Dadurch sind unterschiedliche SQL-Formulierungen möglich. Schreibende Anweisungen laufen ausschliesslich in einer isolierten Trainingskopie; die Ausgangsdaten bleiben unverändert.
+
+## Abschlusszertifikat
+
+Nach der letzten Mission kann die lernende Person ihren Namen eingeben und ein Zertifikat erzeugen. Es weist die 26 gelösten Missionen, die insgesamt verwendeten Hinweise, die ohne Hinweis gelösten Missionen und die Hinweisanzahl pro Kapitel aus. Über **Drucken / als PDF speichern** kann das Zertifikat mit der Druckfunktion des Browsers als PDF gesichert werden.
+
+Die Hinweisanzahl wird beim erfolgreichen Abschluss jeder Mission eingefroren. Später geöffnete Hinweise verändern das Zertifikat nicht. Bereits vorhandene Spielstände werden beim nächsten Laden automatisch in dieses Format übernommen.
 
 ## Lokal starten
 
@@ -103,6 +110,8 @@ sql-breakout/
 ## Datenschutz und Speicherung
 
 SQL-Ausführung und Fortschrittsspeicherung erfolgen ausschliesslich lokal im Browser. Es werden keine Lern- oder Personendaten an einen Server übermittelt. Der Fortschritt gehört zum jeweiligen Browserprofil, kann als JSON-Datei exportiert und auf einem anderen Gerät wieder importiert werden.
+
+Der für ein Zertifikat eingegebene Name wird ebenfalls nur lokal gespeichert und in einen exportierten Spielstand aufgenommen.
 
 Beim Wechsel zwischen den Kapiteln bleiben gelöste Missionen, verwendete Hinweise und eigene Abfragen erhalten. Über **Fortschritt zurücksetzen** werden alle lokal gespeicherten Spieldaten gelöscht.
 

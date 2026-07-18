@@ -11,8 +11,10 @@
     currentChallenge: "1-1",
     solvedChallenges: [],
     hintsUsed: {},
+    hintsAtCompletion: {},
     codeFragments: [],
     savedQueries: {},
+    certificateName: "",
     lastPlayed: null
   };
 
@@ -26,7 +28,9 @@
       introSeen: stored.introSeen === true,
       solvedChallenges: Array.isArray(stored.solvedChallenges) ? stored.solvedChallenges.filter(id => typeof id === "string") : [],
       hintsUsed: stored.hintsUsed && typeof stored.hintsUsed === "object" && !Array.isArray(stored.hintsUsed) ? stored.hintsUsed : {},
+      hintsAtCompletion: stored.hintsAtCompletion && typeof stored.hintsAtCompletion === "object" && !Array.isArray(stored.hintsAtCompletion) ? stored.hintsAtCompletion : {},
       codeFragments: Array.isArray(stored.codeFragments) ? stored.codeFragments.filter(fragment => typeof fragment === "string") : [],
+      certificateName: typeof stored.certificateName === "string" ? stored.certificateName.slice(0, 80) : "",
       savedQueries: savedQueriesAreCurrent && stored.savedQueries && typeof stored.savedQueries === "object" && !Array.isArray(stored.savedQueries)
         ? stored.savedQueries
         : {}

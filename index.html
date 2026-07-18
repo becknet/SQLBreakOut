@@ -7,13 +7,13 @@
   <meta name="theme-color" content="#111827">
   <title>SQL Breakout – Der verschwundene Datensatz</title>
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="css/style.css?v=8">
+  <link rel="stylesheet" href="css/style.css?v=9">
   <script defer src="vendor/sql-wasm.js"></script>
-  <script defer src="js/challenges.js?v=8"></script>
-  <script defer src="js/game-rules.js?v=8"></script>
-  <script defer src="js/database.js?v=8"></script>
-  <script defer src="js/storage.js?v=8"></script>
-  <script defer src="js/app.js?v=8"></script>
+  <script defer src="js/challenges.js?v=9"></script>
+  <script defer src="js/game-rules.js?v=9"></script>
+  <script defer src="js/database.js?v=9"></script>
+  <script defer src="js/storage.js?v=9"></script>
+  <script defer src="js/app.js?v=9"></script>
 </head>
 <body>
   <a class="skip-link" href="#sql-editor">Direkt zum SQL-Editor</a>
@@ -52,6 +52,10 @@
         </button>
         <input id="import-file" type="file" accept="application/json,.json" hidden>
       </div>
+      <button class="text-button certificate-nav-button" id="open-final" type="button" hidden>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 9.8 7.5 5 8.2l3.5 3.4-.8 4.8 4.3-2.3 4.3 2.3-.8-4.8L19 8.2l-4.8-.7L12 3Z"></path><path d="M9 18.5 7.5 22M15 18.5l1.5 3.5"></path></svg>
+        Abschluss &amp; Zertifikat
+      </button>
       <button class="text-button" id="reset-progress" type="button">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.3-5.7L4 8.6M4 4v4.6h4.6"></path></svg>
         Fortschritt zurücksetzen
@@ -198,8 +202,48 @@
     <h2 id="final-title">Der Launch ist gerettet</h2>
     <p>Du hast alle fünf Kapitel abgeschlossen, das Angriffskonto identifiziert und sichere Datenreparaturen vorbereitet.</p>
     <div class="final-code"><span>Gesicherter Gesamtcode</span><strong id="final-code"></strong></div>
-    <button class="primary-button wide" id="export-final-progress" type="button">Spielstand exportieren</button>
+    <div class="completion-stats" role="group" aria-label="Unterstützungsstatistik">
+      <div><strong id="final-hints-total">0</strong><span>Hinweise geöffnet</span></div>
+      <div><strong id="final-no-hint-count">26</strong><span>Missionen ohne Hinweis</span></div>
+    </div>
+    <label class="certificate-label" for="certificate-name">Name auf dem Zertifikat</label>
+    <input class="certificate-name" id="certificate-name" type="text" maxlength="80" autocomplete="name" placeholder="Vorname Nachname">
+    <p class="certificate-error" id="certificate-error" role="alert" hidden></p>
+    <button class="primary-button wide" id="open-certificate" type="button">Zertifikat erstellen</button>
+    <button class="secondary-button wide" id="export-final-progress" type="button">Spielstand exportieren</button>
     <button class="secondary-button wide" id="close-final" type="button">Zur Missionsübersicht</button>
+  </dialog>
+
+  <dialog id="certificate-dialog" class="certificate-modal" aria-labelledby="certificate-title">
+    <button class="close-button" id="close-certificate" type="button" aria-label="Zertifikat schliessen">×</button>
+    <article class="certificate-sheet" id="certificate-sheet">
+      <div class="certificate-brand">
+        <span class="certificate-brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+        <span><b>SQL BREAKOUT</b><small>Pixelwerk Incident Lab</small></span>
+      </div>
+      <p class="certificate-kicker">Kompetenznachweis</p>
+      <h2 id="certificate-title">Zertifikat</h2>
+      <p class="certificate-intro">Dieses Zertifikat bestätigt, dass</p>
+      <p class="certificate-player" id="certificate-player"></p>
+      <p class="certificate-copy">alle 26 SQL-Missionen erfolgreich abgeschlossen und den Pixelwerk-Incident mit sicheren Datenbankabfragen gelöst hat.</p>
+      <div class="certificate-stat-grid">
+        <div><strong>26 / 26</strong><span>Missionen gelöst</span></div>
+        <div><strong id="certificate-hints-total">0</strong><span>Hinweise verwendet</span></div>
+        <div><strong id="certificate-without-hints">26</strong><span>Ohne Hinweis gelöst</span></div>
+      </div>
+      <table class="certificate-table">
+        <thead><tr><th scope="col">Kapitel</th><th scope="col">Missionen</th><th scope="col">Verwendete Hinweise</th></tr></thead>
+        <tbody id="certificate-chapters"></tbody>
+      </table>
+      <div class="certificate-footer">
+        <div><span>Ausgestellt am</span><strong id="certificate-date"></strong></div>
+        <div><span>Gesicherter Gesamtcode</span><strong id="certificate-code"></strong></div>
+      </div>
+    </article>
+    <div class="certificate-actions">
+      <button class="primary-button" id="print-certificate" type="button">Drucken / als PDF speichern</button>
+      <button class="secondary-button" id="back-to-final" type="button">Zurück</button>
+    </div>
   </dialog>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
