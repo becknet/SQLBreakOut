@@ -129,6 +129,11 @@ textarea:focus { box-shadow: inset 0 0 0 2px var(--cyan); }
 .editor-actions { min-height: 52px; display: flex; align-items: center; justify-content: space-between; padding: .55rem .7rem .55rem 1rem; background: #202a3d; border-radius: 0 0 8px 8px; }
 .editor-actions > span { color: #9faabc; font-size: .65rem; }
 .editor-actions .live-dot { margin-right: .4rem; box-shadow: none; }
+.editor-action-buttons { display: flex; align-items: center; gap: .5rem; }
+.editor-action-buttons .secondary-button { width: auto; min-height: 38px; padding: .65rem 1rem; color: #e7edf7; background: transparent; border-color: #526078; font-size: .72rem; }
+.editor-action-buttons .secondary-button:hover:not(:disabled) { border-color: var(--cyan); }
+.editor-action-buttons .secondary-button:disabled { color: #9ca5b3; background: transparent; cursor: wait; opacity: .55; }
+.editor-action-buttons svg { width: 16px; stroke-width: 2.5; }
 .primary-button { min-height: 38px; display: inline-flex; align-items: center; justify-content: center; gap: .55rem; padding: .65rem 1rem; color: #111827; background: var(--lime); border: 0; border-radius: 6px; font-size: .72rem; font-weight: 900; }
 .primary-button:hover:not(:disabled) { background: #ddff57; transform: translateY(-1px); }
 .primary-button:disabled { opacity: .55; cursor: wait; }

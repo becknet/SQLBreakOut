@@ -37,7 +37,7 @@
       "chapter-switcher", "mission-list", "mission-number", "mission-status",
       "mission-title", "mission-story", "mission-task", "mission-objective", "hint-counter",
       "hint-content", "show-hint", "reset-progress", "reset-database", "table-tabs",
-      "schema-fields", "sql-editor", "line-numbers", "run-query", "db-status", "feedback",
+      "schema-fields", "sql-editor", "line-numbers", "run-query", "check-solution", "db-status", "feedback",
       "result-meta", "result-container", "success-dialog", "success-title", "success-text",
       "code-fragment", "next-mission", "open-info", "close-info", "info-dialog", "toast"
     ].forEach(id => { els[id] = document.getElementById(id); });
@@ -54,6 +54,7 @@
     });
     els["show-hint"].addEventListener("click", showNextHint);
     els["run-query"].addEventListener("click", runQuery);
+    els["check-solution"].addEventListener("click", checkSolution);
     els["reset-database"].addEventListener("click", resetDatabase);
     els["reset-progress"].addEventListener("click", resetProgress);
     els["sql-editor"].addEventListener("input", updateEditor);
@@ -222,16 +223,28 @@
   }
 
   function runQuery() {
+    executeQuery(false);
+  }
+
+  function checkSolution() {
+    executeQuery(true);
+  }
+
+  function executeQuery(shouldValidate) {
     const sql = els["sql-editor"].value;
-    setBusy(true, "Abfrage läuft …");
+    setBusy(true, shouldValidate ? "Lösung wird geprüft …" : "Abfrage läuft …");
     clearFeedback();
     window.setTimeout(() => {
       try {
         const result = db.execute(sql);
         renderResult(result);
-        const validation = validateResult(result, activeChallenge);
-        if (validation.ok) completeMission();
-        else showFeedback("info", validation.message);
+        if (shouldValidate) {
+          const validation = validateResult(result, activeChallenge);
+          if (validation.ok) completeMission();
+          else showFeedback("info", validation.message);
+        } else {
+          showFeedback("info", "Abfrage ausgeführt. Prüfe das Ergebnis und klicke anschliessend auf «Lösung prüfen».");
+        }
       } catch (error) {
         renderErrorState();
         showFeedback("error", friendlyError(error));
@@ -355,6 +368,7 @@
 
   function setBusy(busy, text) {
     els["run-query"].disabled = busy;
+    els["check-solution"].disabled = busy;
     els["db-status"].innerHTML = `<span class="live-dot"></span> ${escapeHtml(text)}`;
   }
 

@@ -9,6 +9,7 @@ Statische Lern-Web-App für SQL mit einer fortlaufenden Geschichte in der fiktiv
 - zwei aufeinander aufbauende Kapitel mit je fünf Missionen
 - SQL-Editor mit Tastenkürzel `Cmd/Ctrl + Enter`
 - leerer SQL-Editor zu Beginn jeder Mission; Hilfen erscheinen nur auf Wunsch
+- getrennte Aktionen zum Anzeigen des Abfrageergebnisses und zum Prüfen der Lösung
 - ergebnisbasierte Prüfung: alternative korrekte Abfragen werden akzeptiert
 - drei Hinweisstufen pro Aufgabe
 - Datenbank- und Fortschritts-Reset

@@ -7,13 +7,13 @@
   <meta name="theme-color" content="#111827">
   <title>SQL Breakout – Der verschwundene Datensatz</title>
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="css/style.css?v=2">
+  <link rel="stylesheet" href="css/style.css?v=3">
   <script defer src="vendor/sql-wasm.js"></script>
-  <script defer src="js/challenges.js?v=2"></script>
-  <script defer src="js/game-rules.js?v=2"></script>
-  <script defer src="js/database.js?v=2"></script>
-  <script defer src="js/storage.js?v=2"></script>
-  <script defer src="js/app.js?v=2"></script>
+  <script defer src="js/challenges.js?v=3"></script>
+  <script defer src="js/game-rules.js?v=3"></script>
+  <script defer src="js/database.js?v=3"></script>
+  <script defer src="js/storage.js?v=3"></script>
+  <script defer src="js/app.js?v=3"></script>
 </head>
 <body>
   <a class="skip-link" href="#sql-editor">Direkt zum SQL-Editor</a>
@@ -109,10 +109,16 @@
         <p class="sr-only" id="editor-help">Formuliere die SQL-Abfrage selbst. Falls du Unterstützung brauchst, kannst du schrittweise Hinweise öffnen. Mit Befehlstaste und Enter wird die Abfrage ausgeführt.</p>
         <div class="editor-actions">
           <span id="db-status"><span class="live-dot"></span> Datenbank bereit</span>
-          <button class="primary-button" id="run-query" type="button">
-            Abfrage ausführen
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"></path></svg>
-          </button>
+          <div class="editor-action-buttons">
+            <button class="secondary-button editor-button" id="run-query" type="button">
+              Abfrage ausführen
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"></path></svg>
+            </button>
+            <button class="primary-button" id="check-solution" type="button">
+              Lösung prüfen
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6"></path></svg>
+            </button>
+          </div>
         </div>
       </div>
 
