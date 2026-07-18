@@ -7,6 +7,7 @@ Statische Lern-Web-App für SQL mit einer fortlaufenden Geschichte in der fiktiv
 - SQLite direkt im Browser mit lokal eingebundenem `sql.js`
 - kleine Pixelwerk-Datenbank mit fünf Tabellen und realistischen Beispieldaten
 - zwei aufeinander aufbauende Kapitel mit je fünf Missionen
+- Einführungsmodal mit Vorgeschichte beim Start eines neuen Spielstands
 - SQL-Editor mit Tastenkürzel `Cmd/Ctrl + Enter`
 - leerer SQL-Editor zu Beginn jeder Mission; Hilfen erscheinen nur auf Wunsch
 - getrennte Aktionen zum Anzeigen des Abfrageergebnisses und zum Prüfen der Lösung

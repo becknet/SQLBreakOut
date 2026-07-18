@@ -25,6 +25,7 @@
       selectChallenge(initial.id);
       renderSchema();
       setBusy(false, "Datenbank bereit");
+      if (!state.introSeen) window.setTimeout(openIntroDialog, 150);
     } catch (error) {
       showFeedback("error", `Die Datenbank konnte nicht geladen werden: ${friendlyError(error)}`);
       setBusy(true, "Ladefehler");
@@ -38,7 +39,7 @@
       "mission-title", "mission-story", "mission-task", "mission-objective", "hint-counter",
       "hint-content", "show-hint", "reset-progress", "reset-database", "table-tabs",
       "schema-fields", "sql-editor", "line-numbers", "run-query", "check-solution", "db-status", "feedback",
-      "result-meta", "result-container", "success-dialog", "success-title", "success-text",
+      "result-meta", "result-container", "intro-dialog", "start-game", "success-dialog", "success-title", "success-text",
       "code-fragment", "next-mission", "open-info", "close-info", "info-dialog", "toast"
     ].forEach(id => { els[id] = document.getElementById(id); });
   }
@@ -79,6 +80,8 @@
       }
     });
     els["next-mission"].addEventListener("click", goToNextMission);
+    els["start-game"].addEventListener("click", startGame);
+    els["intro-dialog"].addEventListener("cancel", event => event.preventDefault());
     els["open-info"].addEventListener("click", () => els["info-dialog"].showModal());
     els["close-info"].addEventListener("click", () => els["info-dialog"].close());
     els["info-dialog"].addEventListener("click", closeOnBackdrop);
@@ -87,6 +90,17 @@
 
   function closeOnBackdrop(event) {
     if (event.target === event.currentTarget) event.currentTarget.close();
+  }
+
+  function openIntroDialog() {
+    if (!els["intro-dialog"].open) els["intro-dialog"].showModal();
+  }
+
+  function startGame() {
+    state.introSeen = true;
+    storage.save(state);
+    els["intro-dialog"].close();
+    els["sql-editor"].focus();
   }
 
   function getAvailableChallenge(requestedId) {
@@ -329,6 +343,7 @@
     state = storage.reset();
     selectChallenge(challenges[0].id);
     showToast("Der Spielfortschritt wurde zurückgesetzt.");
+    openIntroDialog();
   }
 
   function renderResult(result) {

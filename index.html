@@ -7,13 +7,13 @@
   <meta name="theme-color" content="#111827">
   <title>SQL Breakout – Der verschwundene Datensatz</title>
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="css/style.css?v=4">
+  <link rel="stylesheet" href="css/style.css?v=5">
   <script defer src="vendor/sql-wasm.js"></script>
-  <script defer src="js/challenges.js?v=4"></script>
-  <script defer src="js/game-rules.js?v=4"></script>
-  <script defer src="js/database.js?v=4"></script>
-  <script defer src="js/storage.js?v=4"></script>
-  <script defer src="js/app.js?v=4"></script>
+  <script defer src="js/challenges.js?v=5"></script>
+  <script defer src="js/game-rules.js?v=5"></script>
+  <script defer src="js/database.js?v=5"></script>
+  <script defer src="js/storage.js?v=5"></script>
+  <script defer src="js/app.js?v=5"></script>
 </head>
 <body>
   <a class="skip-link" href="#sql-editor">Direkt zum SQL-Editor</a>
@@ -137,6 +137,27 @@
       </section>
     </section>
   </main>
+
+  <dialog id="intro-dialog" class="modal intro-modal" aria-labelledby="intro-title">
+    <div class="intro-signal" aria-hidden="true"><span></span> EILMELDUNG · PIXELWERK</div>
+    <p class="eyebrow">01:23 UHR · NACHT VOR DEM LAUNCH</p>
+    <h2 id="intro-title">Der Launch ist in Gefahr</h2>
+    <p class="intro-lead">Morgen früh soll die wichtigste Kampagne der Agentur Pixelwerk online gehen. Doch in der Nacht wurden Benutzerkonten, Kampagnen und Protokolle in der Projektdatenbank manipuliert.</p>
+    <div class="intro-message">
+      <span class="avatar" aria-hidden="true">MK</span>
+      <p><strong>Mara, Projektleitung:</strong> „Wir haben nur wenig Zeit. Finde heraus, was verändert wurde, und sichere die Spuren, bevor der Launch beginnt.“</p>
+    </div>
+    <div class="intro-mission">
+      <h3>Dein Auftrag</h3>
+      <ul>
+        <li>Untersuche die Pixelwerk-Datenbank mit eigenen SQL-Abfragen.</li>
+        <li>Löse zehn aufeinander aufbauende Missionen.</li>
+        <li>Sammle alle Codefragmente und entschlüssle den Zugangscode.</li>
+      </ul>
+    </div>
+    <p class="intro-note">Deine Abfragen und dein Spielfortschritt bleiben lokal in diesem Browser.</p>
+    <button class="primary-button wide" id="start-game" type="button">Mission starten <span>→</span></button>
+  </dialog>
 
   <dialog id="success-dialog" class="modal">
     <div class="success-icon" aria-hidden="true">✓</div>

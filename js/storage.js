@@ -5,6 +5,7 @@
   const CONTENT_VERSION = 2;
   const DEFAULT_STATE = {
     contentVersion: CONTENT_VERSION,
+    introSeen: false,
     currentChallenge: "1-1",
     solvedChallenges: [],
     hintsUsed: {},

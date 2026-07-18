@@ -160,6 +160,18 @@ textarea:focus { box-shadow: inset 0 0 0 2px var(--cyan); }
 .modal::backdrop { background: rgba(8, 15, 28, .72); backdrop-filter: blur(3px); }
 .modal h2 { margin: .35rem 0 .7rem; font-size: 1.7rem; }
 .modal > p:not(.eyebrow) { color: var(--muted); font-size: .85rem; line-height: 1.55; }
+.intro-modal { width: min(560px, calc(100% - 2rem)); max-height: calc(100vh - 2rem); padding: 2rem; text-align: left; overflow-y: auto; }
+.intro-modal h2 { margin-bottom: .85rem; font-size: clamp(1.7rem, 5vw, 2.25rem); letter-spacing: -.035em; }
+.intro-signal { display: inline-flex; align-items: center; gap: .45rem; margin-bottom: 1.3rem; padding: .35rem .55rem; color: #d9f9fc; background: var(--nav); border-radius: 4px; font: 800 .62rem "SFMono-Regular", monospace; letter-spacing: .08em; }
+.intro-signal span { width: 7px; height: 7px; background: var(--danger); border-radius: 50%; box-shadow: 0 0 0 3px rgba(199, 58, 80, .2); }
+.intro-modal .intro-lead { margin: 0 0 1.2rem; color: #465166; font-size: .92rem; }
+.intro-message { display: grid; grid-template-columns: 38px 1fr; gap: .8rem; padding: 1rem; background: #eef1f4; border-left: 3px solid var(--cyan); border-radius: 4px 9px 9px 4px; }
+.intro-message p { margin: 0; color: #4e596c; font-size: .8rem; line-height: 1.55; }
+.intro-message strong { color: var(--ink); }
+.intro-mission { margin: 1.2rem 0 1rem; padding: 1rem; border: 1px solid var(--line); border-radius: 8px; }
+.intro-mission h3 { margin: 0 0 .6rem; font-size: .7rem; letter-spacing: .1em; text-transform: uppercase; }
+.intro-mission ul { margin: 0; padding-left: 1.15rem; color: #4e596c; font-size: .78rem; line-height: 1.65; }
+.intro-modal .intro-note { margin: 0 0 1rem; color: #7c8799; font-size: .7rem; }
 .success-icon { width: 54px; height: 54px; display: grid; place-items: center; margin: 0 auto 1rem; color: #10201a; background: var(--lime); border-radius: 50%; font-size: 1.6rem; font-weight: 900; }
 .code-fragment { margin: 1.3rem 0; padding: 1rem; background: var(--nav); color: white; border-radius: 9px; }
 .code-fragment span { display: block; color: #929db0; font-size: .62rem; letter-spacing: .12em; text-transform: uppercase; }
