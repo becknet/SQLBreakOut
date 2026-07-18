@@ -108,34 +108,80 @@
     reset();
   }
 
-  function reset() {
-    if (database) database.close();
-    database = new SQL.Database();
-    database.run("PRAGMA foreign_keys = ON;");
-    database.run(SEED_SQL);
+  function createSeededDatabase() {
+    const seeded = new SQL.Database();
+    seeded.run("PRAGMA foreign_keys = ON;");
+    seeded.run(SEED_SQL);
+    return seeded;
   }
 
-  function isReadOnlyQuery(sql) {
-    const withoutComments = sql
+  function reset() {
+    if (database) database.close();
+    database = createSeededDatabase();
+  }
+
+  function inspectStatement(sql) {
+    const maskedStrings = sql.replace(/'(?:''|[^'])*'/g, match => " ".repeat(match.length));
+    const withoutComments = maskedStrings
       .replace(/\/\*[\s\S]*?\*\//g, " ")
       .replace(/--.*$/gm, " ")
       .trim();
-    if (!/^(SELECT|WITH)\b/i.test(withoutComments)) return false;
-    const commandsOnly = withoutComments.replace(/'(?:''|[^'])*'/g, "''");
-    return !/\b(INSERT|UPDATE|DELETE|DROP|ALTER|CREATE|REPLACE|ATTACH|DETACH|VACUUM|PRAGMA|REINDEX|ANALYZE)\b/i.test(commandsOnly);
+    const withoutTrailingSemicolon = withoutComments.replace(/;\s*$/, "").trim();
+    if (withoutTrailingSemicolon.includes(";")) {
+      throw new Error("Führe pro Versuch genau eine SQL-Anweisung aus.");
+    }
+    const match = withoutTrailingSemicolon.match(/^([A-Z]+)\b/i);
+    if (!match) throw new Error("Die SQL-Anweisung konnte nicht erkannt werden.");
+    return {
+      command: match[1].toUpperCase(),
+      hasWhere: /\bWHERE\b/i.test(withoutTrailingSemicolon),
+      inspectedSql: withoutTrailingSemicolon
+    };
   }
 
-  function execute(sql) {
+  function execute(sql, options = {}) {
     if (!sql.trim()) throw new Error("Bitte gib zuerst eine SQL-Abfrage ein.");
-    if (!isReadOnlyQuery(sql)) {
-      throw new Error("Dieses Trainingslabor ist schreibgeschützt. Verwende eine SELECT-Abfrage, um Daten zu untersuchen.");
+    const statement = inspectStatement(sql);
+    const readOnly = statement.command === "SELECT" || statement.command === "WITH";
+    const mutation = ["INSERT", "UPDATE", "DELETE"].includes(statement.command);
+    const forbidden = /\b(DROP|ALTER|CREATE|REPLACE|ATTACH|DETACH|VACUUM|PRAGMA|REINDEX|ANALYZE|TRANSACTION|COMMIT|ROLLBACK)\b/i;
+
+    if (forbidden.test(statement.inspectedSql)) {
+      throw new Error("Diese SQL-Anweisung ist im Trainingslabor nicht erlaubt.");
+    }
+    if (readOnly && /\b(INSERT|UPDATE|DELETE)\b/i.test(statement.inspectedSql)) {
+      throw new Error("Schreibende Unterabfragen sind im Trainingslabor nicht erlaubt.");
+    }
+    if (!readOnly && !mutation) {
+      throw new Error("Erlaubt sind SELECT, INSERT, UPDATE und DELETE.");
+    }
+    if (mutation && !options.allowMutations) {
+      throw new Error("Diese Mission ist schreibgeschützt. Verwende eine SELECT-Abfrage.");
+    }
+    if (["UPDATE", "DELETE"].includes(statement.command) && !statement.hasWhere) {
+      throw new Error(`${statement.command} ohne WHERE wurde blockiert. Grenze die betroffenen Zeilen mit einem sicheren Filter ein.`);
     }
 
     const sandbox = new SQL.Database(database.export());
     try {
+      sandbox.run("PRAGMA foreign_keys = ON;");
       const resultSets = sandbox.exec(sql);
-      if (resultSets.length === 0) return { columns: [], values: [] };
-      return resultSets[resultSets.length - 1];
+      const rowsModified = mutation ? sandbox.getRowsModified() : 0;
+      const result = mutation
+        ? {
+            columns: ["Aktion", "Betroffene Zeilen", "Ausführung"],
+            values: [[statement.command, rowsModified, "Isolierte Trainingskopie"]]
+          }
+        : resultSets[resultSets.length - 1] || { columns: [], values: [] };
+      const verificationSets = options.verificationSql ? sandbox.exec(options.verificationSql) : [];
+      return {
+        ...result,
+        command: statement.command,
+        hasWhere: statement.hasWhere,
+        isMutation: mutation,
+        rowsModified,
+        verification: verificationSets[verificationSets.length - 1] || { columns: [], values: [] }
+      };
     } finally {
       sandbox.close();
     }
@@ -146,5 +192,23 @@
     return result[0] || { columns: [], values: [] };
   }
 
-  window.PixelwerkDatabase = { initialize, reset, execute, expectedResult, schema: SCHEMA };
+  function expectedMutationResult(sql, verificationSql) {
+    const expectedDatabase = createSeededDatabase();
+    try {
+      expectedDatabase.exec(sql);
+      const result = expectedDatabase.exec(verificationSql);
+      return result[result.length - 1] || { columns: [], values: [] };
+    } finally {
+      expectedDatabase.close();
+    }
+  }
+
+  window.PixelwerkDatabase = {
+    initialize,
+    reset,
+    execute,
+    expectedResult,
+    expectedMutationResult,
+    schema: SCHEMA
+  };
 })();

@@ -7,13 +7,13 @@
   <meta name="theme-color" content="#111827">
   <title>SQL Breakout – Der verschwundene Datensatz</title>
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="css/style.css?v=5">
+  <link rel="stylesheet" href="css/style.css?v=7">
   <script defer src="vendor/sql-wasm.js"></script>
-  <script defer src="js/challenges.js?v=5"></script>
-  <script defer src="js/game-rules.js?v=5"></script>
-  <script defer src="js/database.js?v=5"></script>
-  <script defer src="js/storage.js?v=5"></script>
-  <script defer src="js/app.js?v=5"></script>
+  <script defer src="js/challenges.js?v=7"></script>
+  <script defer src="js/game-rules.js?v=7"></script>
+  <script defer src="js/database.js?v=7"></script>
+  <script defer src="js/storage.js?v=7"></script>
+  <script defer src="js/app.js?v=7"></script>
 </head>
 <body>
   <a class="skip-link" href="#sql-editor">Direkt zum SQL-Editor</a>
@@ -24,8 +24,8 @@
       <span><b>SQL BREAKOUT</b><small>Pixelwerk Incident Lab</small></span>
     </a>
     <div class="header-progress">
-      <span id="progress-label">0 von 10 Missionen</span>
-      <div class="progress-track" role="progressbar" aria-label="Gesamtfortschritt" aria-valuemin="0" aria-valuemax="10" aria-valuenow="0">
+      <span id="progress-label">0 von 26 Missionen</span>
+      <div class="progress-track" role="progressbar" aria-label="Gesamtfortschritt" aria-valuemin="0" aria-valuemax="26" aria-valuenow="0">
         <span id="progress-bar"></span>
       </div>
     </div>
@@ -41,6 +41,17 @@
       <p id="chapter-subtitle">Finde die Spur in der Pixelwerk-Datenbank.</p>
       <div class="chapter-switcher" id="chapter-switcher" role="group" aria-label="Kapitel auswählen"></div>
       <ol id="mission-list" class="mission-list"></ol>
+      <div class="save-tools" role="group" aria-label="Spielstand verwalten">
+        <button class="text-button" id="export-progress" type="button">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M4 20h16"></path></svg>
+          Spielstand exportieren
+        </button>
+        <button class="text-button" id="import-progress" type="button">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4M7 9l5-5 5 5M4 20h16"></path></svg>
+          Spielstand importieren
+        </button>
+        <input id="import-file" type="file" accept="application/json,.json" hidden>
+      </div>
       <button class="text-button" id="reset-progress" type="button">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.3-5.7L4 8.6M4 4v4.6h4.6"></path></svg>
         Fortschritt zurücksetzen
@@ -151,7 +162,7 @@
       <h3>Dein Auftrag</h3>
       <ul>
         <li>Untersuche die Pixelwerk-Datenbank mit eigenen SQL-Abfragen.</li>
-        <li>Löse zehn aufeinander aufbauende Missionen.</li>
+        <li>Löse 26 aufeinander aufbauende Missionen in fünf Kapiteln.</li>
         <li>Sammle alle Codefragmente und entschlüssle den Zugangscode.</li>
       </ul>
     </div>
@@ -172,12 +183,23 @@
     <button class="close-button" id="close-info" type="button" aria-label="Schliessen">×</button>
     <p class="eyebrow">ÜBER DAS SPIEL</p>
     <h2>Willkommen im Incident Lab</h2>
-    <p>Du untersuchst eine manipulierte Agenturdatenbank. Löse zehn SQL-Missionen in zwei Kapiteln und finde den Zugangscode. Alle Abfragen laufen ausschliesslich in deinem Browser.</p>
+    <p>Du untersuchst eine manipulierte Agenturdatenbank. Löse 26 SQL-Missionen in fünf Kapiteln und finde den Zugangscode. Alle Abfragen laufen ausschliesslich in deinem Browser.</p>
     <ul>
-      <li>Beide Kapitel erlauben nur lesende <code>SELECT</code>-Abfragen.</li>
-      <li>Dein Fortschritt wird lokal auf diesem Gerät gespeichert.</li>
-      <li>Zehn Missionen in zwei Kapiteln prüfen das Ergebnis, nicht den exakten SQL-Text.</li>
-    </ul>
+        <li>Fünf Kapitel führen von <code>SELECT</code> bis zu sicheren Datenänderungen.</li>
+        <li>Dein Fortschritt wird lokal auf diesem Gerät gespeichert.</li>
+        <li>26 Missionen prüfen das Ergebnis oder den Datenzustand, nicht den exakten SQL-Text.</li>
+        <li>Über Export und Import kannst du den Spielstand auf ein anderes Gerät übertragen.</li>
+      </ul>
+  </dialog>
+
+  <dialog id="final-dialog" class="modal final-modal" aria-labelledby="final-title">
+    <div class="success-icon" aria-hidden="true">✓</div>
+    <p class="eyebrow">INCIDENT GELÖST</p>
+    <h2 id="final-title">Der Launch ist gerettet</h2>
+    <p>Du hast alle fünf Kapitel abgeschlossen, das Angriffskonto identifiziert und sichere Datenreparaturen vorbereitet.</p>
+    <div class="final-code"><span>Gesicherter Gesamtcode</span><strong id="final-code"></strong></div>
+    <button class="primary-button wide" id="export-final-progress" type="button">Spielstand exportieren</button>
+    <button class="secondary-button wide" id="close-final" type="button">Zur Missionsübersicht</button>
   </dialog>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>

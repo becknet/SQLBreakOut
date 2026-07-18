@@ -1,20 +1,23 @@
 # SQL Breakout – Der verschwundene Datensatz
 
-Statische Lern-Web-App für SQL mit einer fortlaufenden Geschichte in der fiktiven Mediamatikagentur Pixelwerk. Zehn Missionen in zwei Kapiteln führen von einfachen Abfragen zu kombinierten Filtern.
+Statische Lern-Web-App für SQL mit einer fortlaufenden Geschichte in der fiktiven Mediamatikagentur Pixelwerk. 26 Missionen in fünf Kapiteln führen von einfachen Abfragen bis zu sicheren Datenänderungen.
 
 ## Enthalten
 
 - SQLite direkt im Browser mit lokal eingebundenem `sql.js`
 - kleine Pixelwerk-Datenbank mit fünf Tabellen und realistischen Beispieldaten
-- zwei aufeinander aufbauende Kapitel mit je fünf Missionen
+- fünf aufeinander aufbauende Kapitel mit insgesamt 26 Missionen
 - Einführungsmodal mit Vorgeschichte beim Start eines neuen Spielstands
 - SQL-Editor mit Tastenkürzel `Cmd/Ctrl + Enter`
 - leerer SQL-Editor zu Beginn jeder Mission; Hilfen erscheinen nur auf Wunsch
 - getrennte Aktionen zum Anzeigen des Abfrageergebnisses und zum Prüfen der Lösung
-- ergebnisbasierte Prüfung: alternative korrekte Abfragen werden akzeptiert
+- ergebnis- und zustandsbasierte Prüfung: alternative korrekte Abfragen werden akzeptiert
 - drei Hinweisstufen pro Aufgabe
 - Datenbank- und Fortschritts-Reset
 - lokaler Spielstand via `localStorage`
+- Export und Import des Spielstands als JSON-Datei
+- isolierte Vorschau für `INSERT`, `UPDATE` und `DELETE`
+- blockierte `UPDATE`- und `DELETE`-Anweisungen ohne `WHERE`
 - responsive, tastaturbedienbare Oberfläche
 - keine Benutzerkonten, kein Backend und keine externen Laufzeit-Abhängigkeiten
 
@@ -26,9 +29,21 @@ Statische Lern-Web-App für SQL mit einer fortlaufenden Geschichte in der fiktiv
 
 ### Kapitel 2 – Die Spur im System
 
-Vergleichsoperatoren mit `AND`, `OR` und `NOT`, Textmuster mit `LIKE`, Wertebereiche mit `BETWEEN` sowie `IN` und kombinierte Filter. Kapitel 2 wird erst nach Abschluss aller fünf Missionen aus Kapitel 1 freigeschaltet.
+Vergleichsoperatoren mit `AND`, `OR` und `NOT`, Textmuster mit `LIKE`, Wertebereiche mit `BETWEEN` sowie `IN` und kombinierte Filter.
 
-Die Aufgaben werden über das tatsächliche Abfrageergebnis geprüft. Dadurch sind unterschiedliche SQL-Formulierungen möglich, sofern Spalten, Werte und – wo verlangt – Sortierung dem Auftrag entsprechen.
+### Kapitel 3 – Die Zahlen hinter dem Angriff
+
+Aliase mit `AS`, `COUNT`, `SUM`, `AVG`, `MIN`, `MAX` sowie sortierte Ranglisten.
+
+### Kapitel 4 – Muster im Protokoll
+
+Gruppierungen mit `GROUP BY`, Gruppenfilter mit `HAVING` und Kombinationen mit Aggregatfunktionen.
+
+### Kapitel 5 – Die Wiederherstellung
+
+Sichere Datenänderungen mit `INSERT`, `UPDATE`, `DELETE` und präzisen `WHERE`-Filtern. Die Abschlussmission kombiniert Filter, Gruppierung, Aggregation, Sortierung und Begrenzung.
+
+Die Aufgaben werden über das tatsächliche Abfrageergebnis oder den resultierenden Datenzustand geprüft. Dadurch sind unterschiedliche SQL-Formulierungen möglich. Schreibende Anweisungen laufen ausschliesslich in einer isolierten Trainingskopie; die Ausgangsdaten bleiben unverändert.
 
 ## Lokal starten
 
@@ -87,9 +102,9 @@ sql-breakout/
 
 ## Datenschutz und Speicherung
 
-SQL-Ausführung und Fortschrittsspeicherung erfolgen ausschliesslich lokal im Browser. Es werden keine Lern- oder Personendaten an einen Server übermittelt. Der Fortschritt gehört zum jeweiligen Browserprofil und kann über **Fortschritt zurücksetzen** gelöscht werden.
+SQL-Ausführung und Fortschrittsspeicherung erfolgen ausschliesslich lokal im Browser. Es werden keine Lern- oder Personendaten an einen Server übermittelt. Der Fortschritt gehört zum jeweiligen Browserprofil, kann als JSON-Datei exportiert und auf einem anderen Gerät wieder importiert werden.
 
-Beim Wechsel zwischen den Kapiteln bleiben gelöste Missionen, verwendete Hinweise und eigene Abfragen erhalten. Bereits vorhandene Spielstände aus Kapitel 1 werden übernommen.
+Beim Wechsel zwischen den Kapiteln bleiben gelöste Missionen, verwendete Hinweise und eigene Abfragen erhalten. Über **Fortschritt zurücksetzen** werden alle lokal gespeicherten Spieldaten gelöscht.
 
 ## Lizenzhinweis
 

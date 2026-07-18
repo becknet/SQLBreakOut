@@ -40,7 +40,8 @@
       "hint-content", "show-hint", "reset-progress", "reset-database", "table-tabs",
       "schema-fields", "sql-editor", "line-numbers", "run-query", "check-solution", "db-status", "feedback",
       "result-meta", "result-container", "intro-dialog", "start-game", "success-dialog", "success-title", "success-text",
-      "code-fragment", "next-mission", "open-info", "close-info", "info-dialog", "toast"
+      "code-fragment", "next-mission", "open-info", "close-info", "info-dialog", "export-progress",
+      "import-progress", "import-file", "final-dialog", "final-code", "export-final-progress", "close-final", "toast"
     ].forEach(id => { els[id] = document.getElementById(id); });
   }
 
@@ -58,6 +59,10 @@
     els["check-solution"].addEventListener("click", checkSolution);
     els["reset-database"].addEventListener("click", resetDatabase);
     els["reset-progress"].addEventListener("click", resetProgress);
+    els["export-progress"].addEventListener("click", exportProgress);
+    els["export-final-progress"].addEventListener("click", exportProgress);
+    els["import-progress"].addEventListener("click", () => els["import-file"].click());
+    els["import-file"].addEventListener("change", importProgress);
     els["sql-editor"].addEventListener("input", updateEditor);
     els["sql-editor"].addEventListener("keydown", event => {
       if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
@@ -86,6 +91,8 @@
     els["close-info"].addEventListener("click", () => els["info-dialog"].close());
     els["info-dialog"].addEventListener("click", closeOnBackdrop);
     els["success-dialog"].addEventListener("click", closeOnBackdrop);
+    els["final-dialog"].addEventListener("click", closeOnBackdrop);
+    els["close-final"].addEventListener("click", () => els["final-dialog"].close());
   }
 
   function closeOnBackdrop(event) {
@@ -161,7 +168,8 @@
       const solved = chapterChallenges.filter(item => state.solvedChallenges.includes(item.id)).length;
       const complete = solved === chapterChallenges.length;
       return `<button type="button" class="chapter-button${active ? " active" : ""}${complete ? " done" : ""}"
-        data-chapter="${chapter.id}" ${unlocked ? "" : "disabled"} aria-pressed="${active}">
+        data-chapter="${chapter.id}" ${unlocked ? "" : "disabled"} aria-pressed="${active}"
+        aria-label="${escapeHtml(`Kapitel ${chapter.number}: ${chapter.title} – ${unlocked ? `${solved} von ${chapterChallenges.length} gelöst` : "gesperrt"}`)}">
         <span>${complete ? "✓" : chapter.number}</span>
         <small>${unlocked ? `${solved}/${chapterChallenges.length}` : "Gesperrt"}</small>
       </button>`;
@@ -246,16 +254,22 @@
 
   function executeQuery(shouldValidate) {
     const sql = els["sql-editor"].value;
+    const mutationChallenge = activeChallenge.validation.type === "mutation";
     setBusy(true, shouldValidate ? "Lösung wird geprüft …" : "Abfrage läuft …");
     clearFeedback();
     window.setTimeout(() => {
       try {
-        const result = db.execute(sql);
+        const result = db.execute(sql, {
+          allowMutations: mutationChallenge,
+          verificationSql: mutationChallenge ? activeChallenge.validation.verificationSql : null
+        });
         renderResult(result);
         if (shouldValidate) {
-          const validation = validateResult(result, activeChallenge);
+          const validation = validateExecution(result, activeChallenge);
           if (validation.ok) completeMission();
           else showFeedback("info", validation.message);
+        } else if (result.isMutation) {
+          showFeedback("info", `Sichere Vorschau: ${result.rowsModified} Zeile${result.rowsModified === 1 ? "" : "n"} wäre${result.rowsModified === 1 ? "" : "n"} betroffen. Die Ausgangsdaten bleiben unverändert.`);
         } else {
           showFeedback("info", "Abfrage ausgeführt. Prüfe das Ergebnis und klicke anschliessend auf «Lösung prüfen».");
         }
@@ -266,6 +280,39 @@
         setBusy(false, "Datenbank bereit");
       }
     }, 100);
+  }
+
+  function validateExecution(actual, challenge) {
+    return challenge.validation.type === "mutation"
+      ? validateMutation(actual, challenge)
+      : validateResult(actual, challenge);
+  }
+
+  function validateMutation(actual, challenge) {
+    const validation = challenge.validation;
+    if (actual.command !== validation.command) {
+      return { ok: false, message: `Diese Mission erwartet ${validation.command}, deine Anweisung verwendet jedoch ${actual.command}.` };
+    }
+    if (validation.requireWhere && !actual.hasWhere) {
+      return { ok: false, message: `${validation.command} benötigt hier einen sicheren WHERE-Filter.` };
+    }
+    if (Number.isInteger(validation.minAffectedRows) && actual.rowsModified < validation.minAffectedRows) {
+      return { ok: false, message: `Die Anweisung verändert keine passende Zeile. Prüfe Werte und WHERE-Bedingungen.` };
+    }
+    if (Number.isInteger(validation.maxAffectedRows) && actual.rowsModified > validation.maxAffectedRows) {
+      return { ok: false, message: `Die Anweisung würde ${actual.rowsModified} Zeilen verändern. Erlaubt ${validation.maxAffectedRows === 1 ? "ist genau eine Zeile" : `sind höchstens ${validation.maxAffectedRows} Zeilen`}. Verfeinere den Filter.` };
+    }
+
+    const expected = db.expectedMutationResult(validation.expectedSql, validation.verificationSql);
+    if (!sameColumns(actual.verification.columns, expected.columns)) {
+      return { ok: false, message: "Die Anweisung läuft, aber der resultierende Datenzustand besitzt nicht die erwarteten Spalten." };
+    }
+    const actualRows = normalizeRows(actual.verification.values, validation.ordered);
+    const expectedRows = normalizeRows(expected.values, validation.ordered);
+    if (JSON.stringify(actualRows) !== JSON.stringify(expectedRows)) {
+      return { ok: false, message: "Die Anweisung läuft, führt aber noch nicht zum erwarteten Datenzustand. Prüfe Zielwerte und Filter." };
+    }
+    return { ok: true };
   }
 
   function validateResult(actual, challenge) {
@@ -304,7 +351,12 @@
       state.codeFragments.push(activeChallenge.fragment);
       storage.save(state);
     }
-    showFeedback("success", "Korrekt – das Abfrageergebnis entspricht dem Auftrag.");
+    showFeedback(
+      "success",
+      activeChallenge.validation.type === "mutation"
+        ? "Korrekt – der resultierende Datenzustand entspricht dem Auftrag."
+        : "Korrekt – das Abfrageergebnis entspricht dem Auftrag."
+    );
     renderProgress();
     renderChapterNavigation();
     renderMissionList();
@@ -316,7 +368,7 @@
     els["success-text"].textContent = activeChallenge.success;
     els["code-fragment"].textContent = activeChallenge.fragment;
     els["next-mission"].innerHTML = lastOverall
-      ? "Gesamtcode anzeigen <span>→</span>"
+      ? "Finale öffnen <span>→</span>"
       : lastInChapter
         ? `Kapitel ${activeChallenge.chapter + 1} starten <span>→</span>`
         : "Nächste Mission <span>→</span>";
@@ -328,7 +380,8 @@
     const index = challenges.indexOf(activeChallenge);
     if (index < challenges.length - 1) selectChallenge(challenges[index + 1].id);
     else {
-      showToast(`Gesamtcode: ${state.codeFragments.join(" – ")}`);
+      els["final-code"].textContent = state.codeFragments.join("");
+      els["final-dialog"].showModal();
     }
   }
 
@@ -344,6 +397,40 @@
     selectChallenge(challenges[0].id);
     showToast("Der Spielfortschritt wurde zurückgesetzt.");
     openIntroDialog();
+  }
+
+  function exportProgress() {
+    const payload = storage.exportState(state);
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `sql-breakout-spielstand-${new Date().toISOString().slice(0, 10)}.json`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 0);
+    showToast("Spielstand wurde als JSON-Datei exportiert.");
+  }
+
+  async function importProgress(event) {
+    const file = event.target.files[0];
+    event.target.value = "";
+    if (!file) return;
+    if (!window.confirm("Der importierte Spielstand ersetzt den aktuellen Fortschritt. Fortfahren?")) return;
+
+    try {
+      const payload = JSON.parse(await file.text());
+      state = storage.importState(payload);
+      db.reset();
+      const initial = getAvailableChallenge(state.currentChallenge);
+      selectChallenge(initial.id);
+      renderSchema();
+      if (!state.introSeen) openIntroDialog();
+      showToast("Spielstand erfolgreich importiert.");
+    } catch (error) {
+      showFeedback("error", friendlyError(error));
+    }
   }
 
   function renderResult(result) {
