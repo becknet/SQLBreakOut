@@ -38,7 +38,7 @@ Aliase mit `AS`, `COUNT`, `SUM`, `AVG`, `MIN`, `MAX` sowie sortierte Ranglisten.
 
 ### Kapitel 4 – Muster im Protokoll
 
-Gruppierungen mit `GROUP BY`, Gruppenfilter mit `HAVING` und Kombinationen mit Aggregatfunktionen.
+Gruppierungen mit `GROUP BY`, ein schrittweiser Einstieg in `HAVING`, die Kombination von `WHERE` und `HAVING` sowie mehrere Aggregatfunktionen pro Gruppe.
 
 ### Kapitel 5 – Die Wiederherstellung
 

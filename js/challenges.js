@@ -409,68 +409,68 @@ window.SQL_BREAKOUT_CHALLENGES = [
   {
     id: "4-3",
     chapter: 4,
-    shortTitle: "Grosse Teams",
+    shortTitle: "Wiederholungen",
     concept: "HAVING",
-    title: "Abteilungen mit mehreren Konten",
-    story: "Ein einzelnes Konto pro Abteilung ist leicht zu prüfen. Das Krisenteam konzentriert sich deshalb auf Abteilungen mit mindestens zwei Benutzerkonten.",
-    task: "Gruppiere users nach department. Zeige department und COUNT(*) als anzahl für Gruppen mit mindestens zwei Konten. Sortiere nach anzahl absteigend und danach department aufsteigend.",
-    objective: "2 Abteilungen · mindestens 2 Konten",
+    title: "Mehrfach ausgeführte Aktionen",
+    story: "Die Gruppierungen stehen. Nun führt Mara einen neuen Filter ein: Einzelne Aktionen können Zufall sein, wiederholte Aktionstypen bilden dagegen ein Muster.",
+    task: "Gruppiere activity_log nach action. Zeige action und COUNT(*) als anzahl nur für Aktionen, die mindestens zweimal vorkommen.",
+    objective: "2 Aktionsgruppen · erstes HAVING",
     starterSql: "",
     hints: [
       "<code>WHERE</code> filtert einzelne Zeilen, <code>HAVING</code> filtert Gruppen.",
-      "Nutze <code>HAVING COUNT(*) &gt;= 2</code> nach <code>GROUP BY department</code>.",
-      "Gerüst: <code>SELECT department, COUNT(*) AS anzahl FROM users GROUP BY department HAVING COUNT(*) &gt;= 2 ORDER BY anzahl DESC, department ASC;</code>"
+      "Gruppiere nach <code>action</code> und setze danach <code>HAVING COUNT(*) &gt;= 2</code> ein.",
+      "Gerüst: <code>SELECT action, COUNT(*) AS anzahl FROM activity_log GROUP BY action HAVING COUNT(*) &gt;= 2;</code>"
     ],
     validation: {
-      expectedSql: "SELECT department, COUNT(*) AS anzahl FROM users GROUP BY department HAVING COUNT(*) >= 2 ORDER BY anzahl DESC, department ASC",
-      ordered: true
+      expectedSql: "SELECT action, COUNT(*) AS anzahl FROM activity_log GROUP BY action HAVING COUNT(*) >= 2",
+      ordered: false
     },
     fragment: "S",
-    success: "Kreation und Digital bleiben im Fokus. Im Protokoll müssen nun wiederholt auftretende Aktionstypen gefunden werden."
+    success: "SELECT und UPDATE wurden mehrfach protokolliert. Als Nächstes kombinierst du einen Zeilenfilter mit einem Gruppenfilter."
   },
   {
     id: "4-4",
     chapter: 4,
-    shortTitle: "Wiederholungen",
-    concept: "HAVING + COUNT",
-    title: "Mehrfach ausgeführte Aktionen",
-    story: "Einzelne Aktionen können Zufall sein. Wiederholte Aktionstypen bilden dagegen ein belastbares Muster.",
-    task: "Gruppiere activity_log nach action. Zeige action und COUNT(*) als anzahl für Aktionen, die mindestens zweimal vorkommen. Sortiere alphabetisch nach action.",
-    objective: "2 Aktionsgruppen · mindestens 2 Einträge",
+    shortTitle: "Aktive Teams",
+    concept: "WHERE + HAVING",
+    title: "Zwei Filterebenen",
+    story: "Inaktive Konten gehören nicht zur aktuellen Angriffslage. Sie müssen vor dem Gruppieren entfernt werden; erst danach interessieren Abteilungen mit mehreren aktiven Konten.",
+    task: "Berücksichtige aus users nur aktive Konten. Gruppiere sie nach department und zeige department sowie COUNT(*) als aktive_konten für Abteilungen mit mindestens zwei aktiven Konten. Sortiere alphabetisch nach department.",
+    objective: "2 Abteilungen · WHERE vor HAVING",
     starterSql: "",
     hints: [
-      "Zähle die Einträge je <code>action</code> und filtere danach die Gruppen.",
-      "Die Gruppenbedingung lautet <code>HAVING COUNT(*) &gt;= 2</code>.",
-      "Gerüst: <code>SELECT action, COUNT(*) AS anzahl FROM activity_log GROUP BY action HAVING COUNT(*) &gt;= 2 ORDER BY action;</code>"
+      "<code>WHERE active = 1</code> entfernt einzelne Konten vor der Gruppierung. <code>HAVING</code> prüft danach die Anzahl je Gruppe.",
+      "Die Reihenfolge lautet <code>WHERE</code>, <code>GROUP BY</code>, <code>HAVING</code>, <code>ORDER BY</code>.",
+      "Gerüst: <code>SELECT department, COUNT(*) AS aktive_konten FROM users WHERE active = 1 GROUP BY department HAVING COUNT(*) &gt;= 2 ORDER BY department;</code>"
     ],
     validation: {
-      expectedSql: "SELECT action, COUNT(*) AS anzahl FROM activity_log GROUP BY action HAVING COUNT(*) >= 2 ORDER BY action",
+      expectedSql: "SELECT department, COUNT(*) AS aktive_konten FROM users WHERE active = 1 GROUP BY department HAVING COUNT(*) >= 2 ORDER BY department",
       ordered: true
     },
     fragment: "E",
-    success: "SELECT und UPDATE wurden mehrfach protokolliert. Eine letzte Gruppierung zeigt, welche Kampagne besonders viele Inhalte besitzt."
+    success: "WHERE und HAVING greifen auf den richtigen Ebenen. Zum Kapitelabschluss vergleichst du nun zwei Kennzahlen pro Gruppe."
   },
   {
     id: "4-5",
     chapter: 4,
-    shortTitle: "Content-Häufung",
-    concept: "GROUP BY + HAVING",
-    title: "Kampagnen mit mehreren Inhalten",
-    story: "Mehrere Inhalte zur selben Kampagne vergrössern die Angriffsfläche. Finde alle Kampagnen-IDs mit mindestens zwei Content-Datensätzen.",
-    task: "Gruppiere content nach campaign_id. Zeige campaign_id und COUNT(*) als anzahl_inhalte für Gruppen mit mindestens zwei Inhalten. Sortiere nach campaign_id.",
-    objective: "1 Kampagnengruppe · mindestens 2 Inhalte",
+    shortTitle: "Risikoverteilung",
+    concept: "Mehrere Aggregate",
+    title: "Konten und aktive Zugänge",
+    story: "Für den Abschlussbericht reicht eine einzige Kennzahl nicht. Mara möchte je grössere Abteilung sowohl die Gesamtzahl der Konten als auch die Zahl der aktiven Zugänge vergleichen.",
+    task: "Gruppiere users nach department. Zeige department, COUNT(*) als anzahl_konten und SUM(active) als aktive_konten für Abteilungen mit mindestens zwei Konten. Sortiere zuerst nach aktive_konten absteigend, danach nach anzahl_konten absteigend und zuletzt department aufsteigend.",
+    objective: "2 Abteilungen · 2 Aggregate · 3 Sortierstufen",
     starterSql: "",
     hints: [
-      "Die Gruppenspalte ist <code>campaign_id</code>.",
-      "Filtere die gezählten Gruppen mit <code>HAVING COUNT(*) &gt;= 2</code>.",
-      "Gerüst: <code>SELECT campaign_id, COUNT(*) AS anzahl_inhalte FROM content GROUP BY campaign_id HAVING COUNT(*) &gt;= 2 ORDER BY campaign_id;</code>"
+      "Du kannst in derselben Gruppierung mehrere Aggregatfunktionen berechnen: <code>COUNT(*)</code> zählt alle Konten, <code>SUM(active)</code> nur die als 1 gespeicherten aktiven Konten.",
+      "Filtere mit <code>HAVING COUNT(*) &gt;= 2</code>. Verwende danach die beiden Aliase im <code>ORDER BY</code>.",
+      "Gerüst: <code>SELECT department, COUNT(*) AS anzahl_konten, SUM(active) AS aktive_konten FROM users GROUP BY department HAVING COUNT(*) &gt;= 2 ORDER BY aktive_konten DESC, anzahl_konten DESC, department ASC;</code>"
     ],
     validation: {
-      expectedSql: "SELECT campaign_id, COUNT(*) AS anzahl_inhalte FROM content GROUP BY campaign_id HAVING COUNT(*) >= 2 ORDER BY campaign_id",
+      expectedSql: "SELECT department, COUNT(*) AS anzahl_konten, SUM(active) AS aktive_konten FROM users GROUP BY department HAVING COUNT(*) >= 2 ORDER BY aktive_konten DESC, anzahl_konten DESC, department ASC",
       ordered: true
     },
     fragment: "C",
-    success: "Die Häufung ist lokalisiert. Kapitel 4 ist abgeschlossen – jetzt darfst du die isolierte Trainingskopie der Datenbank sicher reparieren."
+    success: "Die Risikoverteilung ist vollständig ausgewertet. Kapitel 4 ist abgeschlossen – jetzt darfst du die isolierte Trainingskopie der Datenbank sicher reparieren."
   },
   {
     id: "5-1",

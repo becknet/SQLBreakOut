@@ -2,7 +2,7 @@
   "use strict";
 
   const KEY = "sql-breakout-progress-v1";
-  const CONTENT_VERSION = 2;
+  const CONTENT_VERSION = 3;
   const EXPORT_FORMAT = "sql-breakout-save";
   const EXPORT_VERSION = 1;
   const DEFAULT_STATE = {
