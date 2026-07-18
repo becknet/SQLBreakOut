@@ -61,7 +61,7 @@
       (12, 2, 'Snack der Zukunft', 'Crossmedia', 18000, 'planung', '2026-08-01', '2026-11-15', 1),
       (13, 3, 'Nacht der Museen', 'Digital', 12500, 'aktiv', '2026-05-10', '2026-09-20', 6),
       (14, 4, 'Move Electric', 'Video', 50000, 'gesperrt', '2026-02-15', '2026-07-30', 6),
-      (15, 1, 'Trail Kids', 'Print', 9500, 'abgeschlossen', '2025-09-01', '2026-01-31', 1);
+      (15, 1, 'Trail Kids', 'Print', 16000, 'abgeschlossen', '2025-09-01', '2026-01-31', 1);
 
     CREATE TABLE content (
       id INTEGER PRIMARY KEY,
