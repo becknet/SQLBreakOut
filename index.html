@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="SQL Breakout – ein spielerischer Einstieg in SQL für angehende Mediamatiker:innen.">
+  <meta name="theme-color" content="#111827">
+  <title>SQL Breakout – Der verschwundene Datensatz</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/style.css">
+  <script defer src="vendor/sql-wasm.js"></script>
+  <script defer src="js/challenges.js"></script>
+  <script defer src="js/game-rules.js"></script>
+  <script defer src="js/database.js"></script>
+  <script defer src="js/storage.js"></script>
+  <script defer src="js/app.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#sql-editor">Direkt zum SQL-Editor</a>
+
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="SQL Breakout – Start">
+      <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+      <span><b>SQL BREAKOUT</b><small>Pixelwerk Incident Lab</small></span>
+    </a>
+    <div class="header-progress">
+      <span id="progress-label">0 von 10 Missionen</span>
+      <div class="progress-track" role="progressbar" aria-label="Gesamtfortschritt" aria-valuemin="0" aria-valuemax="10" aria-valuenow="0">
+        <span id="progress-bar"></span>
+      </div>
+    </div>
+    <button class="icon-button" id="open-info" type="button" aria-label="Spielinfo öffnen" title="Spielinfo">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v5M12 8h.01"></path></svg>
+    </button>
+  </header>
+
+  <main class="game-shell">
+    <aside class="mission-nav" aria-label="Missionen">
+      <div class="chapter-label" id="chapter-label">Kapitel 01</div>
+      <h1 id="chapter-title">Das Briefing</h1>
+      <p id="chapter-subtitle">Finde die Spur in der Pixelwerk-Datenbank.</p>
+      <div class="chapter-switcher" id="chapter-switcher" role="group" aria-label="Kapitel auswählen"></div>
+      <ol id="mission-list" class="mission-list"></ol>
+      <button class="text-button" id="reset-progress" type="button">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.3-5.7L4 8.6M4 4v4.6h4.6"></path></svg>
+        Fortschritt zurücksetzen
+      </button>
+    </aside>
+
+    <section class="briefing-panel" aria-labelledby="mission-title">
+      <div class="eyebrow"><span id="mission-number">MISSION 01</span><span class="status-chip" id="mission-status">AKTIV</span></div>
+      <h2 id="mission-title">Datenbank wird geladen …</h2>
+      <div class="story-card">
+        <span class="avatar" aria-hidden="true">MK</span>
+        <p id="mission-story"></p>
+      </div>
+      <div class="task-block">
+        <h3>Dein Auftrag</h3>
+        <p id="mission-task"></p>
+      </div>
+      <div class="objective">
+        <span>Zielausgabe</span>
+        <code id="mission-objective"></code>
+      </div>
+
+      <div class="hint-section">
+        <div class="hint-heading">
+          <h3>Hinweise</h3>
+          <span id="hint-counter">0 / 3 geöffnet</span>
+        </div>
+        <div id="hint-content" class="hint-content" aria-live="polite">
+          <p>Noch kein Hinweis geöffnet. Versuch es zuerst selbst.</p>
+        </div>
+        <button class="secondary-button" id="show-hint" type="button">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6M10 22h4M8.2 14.5A6 6 0 1 1 15.8 14.5C14.7 15.3 14 16.5 14 18h-4c0-1.5-.7-2.7-1.8-3.5Z"></path></svg>
+          Hinweis öffnen
+        </button>
+      </div>
+    </section>
+
+    <section class="workspace" aria-label="SQL-Arbeitsbereich">
+      <div class="workspace-header">
+        <div>
+          <span class="live-dot"></span>
+          <b>PIXELWERK_DB</b>
+          <small>SQLite · lokal</small>
+        </div>
+        <button class="text-button compact" id="reset-database" type="button" title="Ausgangsdaten neu laden">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.3-5.7L4 8.6M4 4v4.6h4.6"></path></svg>
+          DB zurücksetzen
+        </button>
+      </div>
+
+      <details class="schema" open>
+        <summary>Datenbankschema <span>5 Tabellen</span></summary>
+        <div class="table-tabs" id="table-tabs" role="tablist" aria-label="Tabellen"></div>
+        <div class="schema-fields" id="schema-fields"></div>
+      </details>
+
+      <div class="editor-section">
+        <div class="section-label">
+          <label for="sql-editor">SQL-Editor</label>
+          <span><kbd>⌘</kbd> + <kbd>Enter</kbd> ausführen</span>
+        </div>
+        <div class="editor-wrap">
+          <div class="line-numbers" id="line-numbers" aria-hidden="true">1</div>
+          <textarea id="sql-editor" spellcheck="false" autocapitalize="off" autocomplete="off" aria-describedby="editor-help" placeholder="Schreibe hier deine SQL-Abfrage …"></textarea>
+        </div>
+        <p class="sr-only" id="editor-help">Formuliere die SQL-Abfrage selbst. Falls du Unterstützung brauchst, kannst du schrittweise Hinweise öffnen. Mit Befehlstaste und Enter wird die Abfrage ausgeführt.</p>
+        <div class="editor-actions">
+          <span id="db-status"><span class="live-dot"></span> Datenbank bereit</span>
+          <button class="primary-button" id="run-query" type="button">
+            Abfrage ausführen
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"></path></svg>
+          </button>
+        </div>
+      </div>
+
+      <section class="result-section" aria-labelledby="result-title">
+        <div class="section-label">
+          <h3 id="result-title">Ergebnis</h3>
+          <span id="result-meta">Noch keine Abfrage</span>
+        </div>
+        <div id="feedback" class="feedback" aria-live="assertive" hidden></div>
+        <div class="result-scroll" id="result-container">
+          <div class="empty-state">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"></path></svg>
+            <p>Führe deine erste Abfrage aus.</p>
+          </div>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <dialog id="success-dialog" class="modal">
+    <div class="success-icon" aria-hidden="true">✓</div>
+    <p class="eyebrow">MISSION ABGESCHLOSSEN</p>
+    <h2 id="success-title">Spur gesichert</h2>
+    <p id="success-text"></p>
+    <div class="code-fragment"><span>Codefragment</span><strong id="code-fragment">7</strong></div>
+    <button class="primary-button wide" id="next-mission" type="button">Nächste Mission <span>→</span></button>
+  </dialog>
+
+  <dialog id="info-dialog" class="modal info-modal">
+    <button class="close-button" id="close-info" type="button" aria-label="Schliessen">×</button>
+    <p class="eyebrow">ÜBER DAS SPIEL</p>
+    <h2>Willkommen im Incident Lab</h2>
+    <p>Du untersuchst eine manipulierte Agenturdatenbank. Löse zehn SQL-Missionen in zwei Kapiteln und finde den Zugangscode. Alle Abfragen laufen ausschliesslich in deinem Browser.</p>
+    <ul>
+      <li>Beide Kapitel erlauben nur lesende <code>SELECT</code>-Abfragen.</li>
+      <li>Dein Fortschritt wird lokal auf diesem Gerät gespeichert.</li>
+      <li>Zehn Missionen in zwei Kapiteln prüfen das Ergebnis, nicht den exakten SQL-Text.</li>
+    </ul>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+</body>
+</html>

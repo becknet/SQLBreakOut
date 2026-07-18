@@ -1,0 +1,44 @@
+# Betriebssystem
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Editoren und lokale Arbeitsbereiche
+.idea/
+.vscode/
+*.code-workspace
+*.swp
+*.swo
+*~
+
+# Lokale Konfiguration und Geheimnisse
+.env
+.env.*
+!.env.example
+
+# Protokolle und Laufzeitdateien
+*.log
+*.pid
+logs/
+
+# Temporäre Dateien und Zwischenspeicher
+.cache/
+.tmp/
+tmp/
+temp/
+*.tmp
+*.bak
+
+# Optionale JavaScript-Werkzeuge
+node_modules/
+coverage/
+.nyc_output/
+
+# Lokale Hosting- und Deployment-Daten
+.netlify/
+.vercel/
+
+# Python-Hilfsserver und Werkzeuge
+__pycache__/
+*.py[cod]
+
