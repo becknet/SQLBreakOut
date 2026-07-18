@@ -19,14 +19,14 @@
     collectElements();
     bindEvents();
     freezeCompletedHintCounts();
+    const initial = getAvailableChallenge(state.currentChallenge);
+    selectChallenge(initial.id);
+    renderSchema();
     setBusy(true, "Datenbank wird geladen …");
+    if (!state.introSeen) openIntroDialog();
     try {
       await db.initialize();
-      const initial = getAvailableChallenge(state.currentChallenge);
-      selectChallenge(initial.id);
-      renderSchema();
       setBusy(false, "Datenbank bereit");
-      if (!state.introSeen) window.setTimeout(openIntroDialog, 150);
     } catch (error) {
       showFeedback("error", `Die Datenbank konnte nicht geladen werden: ${friendlyError(error)}`);
       setBusy(true, "Ladefehler");
@@ -191,11 +191,13 @@
       const chapterChallenges = challenges.filter(item => item.chapter === chapter.id);
       const solved = chapterChallenges.filter(item => state.solvedChallenges.includes(item.id)).length;
       const complete = solved === chapterChallenges.length;
+      const visibleMarker = complete ? "✓" : chapter.number;
+      const visibleStatus = unlocked ? `${solved}/${chapterChallenges.length}` : "Gesperrt";
       return `<button type="button" class="chapter-button${active ? " active" : ""}${complete ? " done" : ""}"
         data-chapter="${chapter.id}" ${unlocked ? "" : "disabled"} aria-pressed="${active}"
-        aria-label="${escapeHtml(`Kapitel ${chapter.number}: ${chapter.title} – ${unlocked ? `${solved} von ${chapterChallenges.length} gelöst` : "gesperrt"}`)}">
-        <span>${complete ? "✓" : chapter.number}</span>
-        <small>${unlocked ? `${solved}/${chapterChallenges.length}` : "Gesperrt"}</small>
+        aria-label="${escapeHtml(`${visibleMarker} ${visibleStatus} – Kapitel ${chapter.number}: ${chapter.title}`)}">
+        <span>${visibleMarker}</span>
+        <small>${visibleStatus}</small>
       </button>`;
     }).join("");
   }
